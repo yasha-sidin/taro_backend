@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                            https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+    <changeSet id="create-appointment-date-table" author="Yakov Sidin">
+        <createTable tableName="appointment_date">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="date_from" type="TIMESTAMP">
+                <constraints unique="true" nullable="false"/>
+            </column>
+            <column name="date_to" type="TIMESTAMP">
+                <constraints unique="true" nullable="false"/>
+            </column>
+            <column name="status" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="booking_deadline" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="create-telegram-user-table" author="Yakov Sidin">
+        <createTable tableName="telegram_user">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="chat_id" type="BIGINT">
+                <constraints unique="true" nullable="false"/>
+            </column>
+            <column name="first_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_name" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="username" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="language_code" type="VARCHAR(10)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="create-booking-table" author="Yakov Sidin">
+        <createTable tableName="booking">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseColumnNames="date_id"
+                                 baseTableName="booking"
+                                 constraintName="fk_booking_date_id_appointment_date_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="appointment_date"/>
+
+        <addForeignKeyConstraint baseColumnNames="user_id"
+                                 baseTableName="booking"
+                                 constraintName="fk_booking_user_id_telegram_user_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="telegram_user"/>
+
+        <addUniqueConstraint tableName="booking"
+                             columnNames="user_id,date_id"
+                             constraintName="uq_booking_user_date"/>
+    </changeSet>
+
+    <changeSet id="create-user-admin-table" author="Yakov Sidin">
+        <createTable tableName="user_admin">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="username" type="VARCHAR(255)">
+                <constraints unique="true" nullable="false"/>
+            </column>
+            <column name="password" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="deleted" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="create-notification-table" author="Yakov Sidin">
+        <createTable tableName="notification">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="body" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="send_after" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="telegram_user_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sent" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseColumnNames="telegram_user_id"
+                                 baseTableName="notification"
+                                 constraintName="fk_notification_telegram_user_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="telegram_user"/>
+    </changeSet>
+
+    <changeSet id="create-jwt-token-table" author="Yakov Sidin">
+        <createTable tableName="jwt_token">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_admin_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="token" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="expires_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_used_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseColumnNames="user_admin_id"
+                                 baseTableName="jwt_token"
+                                 constraintName="fk_jwt_token_user_admin_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="user_admin"/>
+    </changeSet>
+
+
+</databaseChangeLog>
