@@ -1,6 +1,7 @@
 package ru.otus
 
-import zio.{ Config, ConfigProvider, ZIO, ZLayer }
+import ru.otus.error.ConfigFailure
+import zio.{Config, ConfigProvider, ZIO, ZLayer}
 import zio.config.magnolia._
 
 package object configuration {
@@ -39,8 +40,8 @@ package object configuration {
   private val configDescriptor: Config[AppConfig] = deriveConfig[AppConfig]
 
   object Configuration {
-    val live: ZLayer[ConfigProvider, Config.Error, Configuration] = ZLayer {
-      ZIO.serviceWithZIO[ConfigProvider](provider => provider.load(configDescriptor))
+    val live: ZLayer[ConfigProvider, ConfigFailure, Configuration] = ZLayer {
+      ZIO.serviceWithZIO[ConfigProvider](provider => provider.load(configDescriptor).mapError(er => ConfigFailure(er.getMessage())))
     }
   }
 }

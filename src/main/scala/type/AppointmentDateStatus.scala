@@ -4,7 +4,7 @@ package `type`
 import enumeratum.{ EnumEntry, _ }
 import io.getquill.MappedEncoding
 
-trait AppointmentDateStatus extends EnumEntry
+sealed trait AppointmentDateStatus extends EnumEntry
 
 object AppointmentDateStatus extends Enum[AppointmentDateStatus] {
   case object Available extends AppointmentDateStatus

@@ -27,6 +27,9 @@
             <column name="updated_at" type="TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
+            <column name="is_deleted" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
     </changeSet>
 
@@ -56,6 +59,9 @@
             <column name="updated_at" type="TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
+            <column name="is_deleted" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
     </changeSet>
 
@@ -73,10 +79,16 @@
             <column name="status" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
+            <column name="time_to_confirm" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
             <column name="created_at" type="TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
             <column name="updated_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_deleted" type="BOOLEAN">
                 <constraints nullable="false"/>
             </column>
         </createTable>
@@ -109,13 +121,13 @@
             <column name="password" type="TEXT">
                 <constraints nullable="false"/>
             </column>
-            <column name="deleted" type="BOOLEAN">
-                <constraints nullable="false"/>
-            </column>
             <column name="created_at" type="TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
             <column name="updated_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_deleted" type="BOOLEAN">
                 <constraints nullable="false"/>
             </column>
         </createTable>
@@ -129,9 +141,6 @@
             <column name="body" type="TEXT">
                 <constraints nullable="false"/>
             </column>
-            <column name="created_at" type="TIMESTAMP">
-                <constraints nullable="false"/>
-            </column>
             <column name="send_after" type="TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
@@ -139,6 +148,15 @@
                 <constraints nullable="false"/>
             </column>
             <column name="sent" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_deleted" type="BOOLEAN">
                 <constraints nullable="false"/>
             </column>
         </createTable>
@@ -155,7 +173,7 @@
             <column name="id" type="UUID">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="user_admin_id" type="BIGINT">
+            <column name="user_admin_id" type="UUID">
                 <constraints nullable="false"/>
             </column>
             <column name="token" type="TEXT">
@@ -164,10 +182,16 @@
             <column name="expires_at" type="TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
+            <column name="last_used_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
             <column name="created_at" type="TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
-            <column name="last_used_at" type="TIMESTAMP">
+            <column name="updated_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_deleted" type="BOOLEAN">
                 <constraints nullable="false"/>
             </column>
         </createTable>
@@ -177,6 +201,17 @@
                                  constraintName="fk_jwt_token_user_admin_id"
                                  referencedColumnNames="id"
                                  referencedTableName="user_admin"/>
+    </changeSet>
+
+    <changeSet id="constant-table" author="Yakov Sidin">
+        <createTable tableName="constant">
+            <column name="key" type="VARCHAR(255)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="value" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
     </changeSet>
 
 

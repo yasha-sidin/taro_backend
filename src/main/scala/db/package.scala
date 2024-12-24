@@ -1,16 +1,17 @@
 package ru.otus
 
 import com.zaxxer.hikari.HikariDataSource
-import io.getquill.{ Literal, NamingStrategy, PostgresZioJdbcContext, SnakeCase }
-import configuration.{ Configuration, LiquibaseConfig, PostgresConfig }
+import io.getquill.{Literal, NamingStrategy, PostgresZioJdbcContext, SnakeCase}
+import configuration.{Configuration, LiquibaseConfig, PostgresConfig}
 
 import liquibase.Liquibase
 import liquibase.database.jvm.JdbcConnection
-import liquibase.resource.{ ClassLoaderResourceAccessor, CompositeResourceAccessor, SearchPathResourceAccessor }
+import liquibase.resource.{ClassLoaderResourceAccessor, CompositeResourceAccessor, SearchPathResourceAccessor}
+import ru.otus.error.{DBFailure, ExpectedFailure, MigrationFailure}
 import zio.macros.accessible
-import zio.{ RIO, RLayer, Scope, ULayer, URIO, URLayer, ZIO, ZLayer }
+import zio.{RIO, RLayer, Scope, ULayer, URIO, URLayer, ZIO, ZLayer}
 
-import javax.sql.{ DataSource => Source }
+import javax.sql.{DataSource => Source}
 
 package object db {
   type DataSource = Source
@@ -25,10 +26,11 @@ package object db {
     dataSource
   }
 
-  val zioDS: URLayer[Configuration, DataSource] = ZLayer {
+  val zioDS: ZLayer[Configuration, ExpectedFailure, DataSource] = ZLayer {
     for {
       config <- ZIO.service[Configuration]
-    } yield hikariDS(config.postgres)
+      ds <- ZIO.attempt(hikariDS(config.postgres)).mapError(er => DBFailure(er))
+    } yield ds
   }
 
   @accessible
@@ -61,14 +63,14 @@ package object db {
         liqui               <- ZIO.attempt(new Liquibase("main.xml", fileOpener, jdbcConn))
       } yield liqui
 
-    val liquibaseLayer: RLayer[Any with Scope with DataSource with Configuration, Liqui] = ZLayer {
+    val liquibaseLayer: ZLayer[Any with Scope with DataSource with Configuration, ExpectedFailure, Liqui] = ZLayer {
       for {
         config <- ZIO.service[Configuration]
         liqui  <- mkLiquibase(config.liquibase)
       } yield liqui
-    }
+    }.mapError(er => MigrationFailure(er.getMessage))
 
-    def liquibase: URIO[Liquibase, LiquibaseService.Liqui] = ZIO.service[Liqui]
+    def liquibase: ZIO[Liquibase, ExpectedFailure, LiquibaseService.Liqui] = ZIO.service[Liqui]
 
     val live: ULayer[Service] = ZLayer.succeed(new Impl)
   }

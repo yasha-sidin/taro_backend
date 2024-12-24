@@ -11,6 +11,7 @@ case class TelegramUser(
     lastName: Option[String],
     username: Option[String],
     languageCode: Option[String],
-    createdAt: Instant,
-    updatedAt: Instant,
-  )
+    override val createdAt: Instant,
+    override val updatedAt: Instant,
+    override val isDeleted: Boolean = false,
+  ) extends Model(isDeleted, createdAt, updatedAt)

@@ -12,9 +12,10 @@ case class AppointmentDate(
     dateTo: Instant,
     status: AppointmentDateStatus,
     bookingDeadline: Instant,
-    createdAt: Instant,
-    updatedAt: Instant,
-  ) { self =>
+    override val createdAt: Instant,
+    override val updatedAt: Instant,
+    override val isDeleted: Boolean = false,
+  ) extends Model(isDeleted, createdAt, updatedAt) { self =>
   def isAvailable: Boolean             = self.status == AppointmentDateStatus.Available
   def isExpired(now: Instant): Boolean = self.bookingDeadline.isBefore(now)
 }

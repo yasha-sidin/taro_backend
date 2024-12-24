@@ -31,6 +31,7 @@ object BookingService {
     def createBooking(bookingCreate: BookingCreate): ZIO[BookingServiceEnv, ExpectedFailure, Booking]
     def updateBooking(booking: Booking): ZIO[BookingServiceEnv, ExpectedFailure, Booking]
     def getBookingById(id: UUID): ZIO[BookingServiceEnv, ExpectedFailure, Booking]
+    def getDateBookings(dateId: UUID): ZIO[BookingServiceEnv, ExpectedFailure, List[Booking]]
   }
 
   class ServiceImpl extends Service {
@@ -45,10 +46,10 @@ object BookingService {
                          bookingCreate.userId,
                          bookingCreate.dateId,
                          bookingCreate.status,
-                         createdAt,
-                         createdAt,
                          bookingCreate.canReturn,
                          bookingCreate.timeToConfirm,
+                         createdAt,
+                         createdAt,
                        )
                      )
       } yield booking
@@ -62,6 +63,9 @@ object BookingService {
 
     override def getBookingById(id: UUID): ZIO[BookingServiceEnv, ExpectedFailure, Booking] =
       BookingRepository.getDataById(id).some.orElseFail(NotFoundFailure(s"Booking with id $id has not been found."))
+
+    override def getDateBookings(dateId: UUID): ZIO[BookingServiceEnv, ExpectedFailure, List[Booking]] =
+      BookingRepository.getDateBookings(dateId)
   }
 
   val live: ULayer[BookingService] = ZLayer.succeed(new ServiceImpl)

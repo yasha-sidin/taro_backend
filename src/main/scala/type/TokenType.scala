@@ -4,7 +4,7 @@ package `type`
 import enumeratum.{ EnumEntry, _ }
 import io.getquill.MappedEncoding
 
-trait TokenType extends EnumEntry
+sealed trait TokenType extends EnumEntry
 
 object TokenType extends Enum[TokenType] {
   case object Refresh extends TokenType

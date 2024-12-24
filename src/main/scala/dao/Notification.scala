@@ -7,8 +7,10 @@ import java.util.UUID
 case class Notification(
     id: UUID,
     body: String,
-    createdAt: Instant,
     sendAfter: Instant,
     telegramUserId: UUID,
     sent: Boolean = false,
-  )
+    override val createdAt: Instant,
+    override val updatedAt: Instant,
+    override val isDeleted: Boolean = false,
+  ) extends Model(isDeleted, createdAt, updatedAt)

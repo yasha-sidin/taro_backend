@@ -6,9 +6,11 @@ import java.util.UUID
 
 case class JwtToken(
     id: UUID,
-    userAdminId: Long,
+    userAdminId: UUID,
     token: String,
     expiresAt: Instant,
-    createdAt: Instant,
     lastUsedAt: Instant,
-  )
+    override val createdAt: Instant,
+    override val updatedAt: Instant,
+    override val isDeleted: Boolean = false,
+  ) extends Model(isDeleted, createdAt, updatedAt)

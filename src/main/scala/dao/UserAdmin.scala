@@ -8,7 +8,7 @@ case class UserAdmin(
     id: UUID,
     username: String,
     password: String,
-    deleted: Boolean,
-    createdAt: Instant,
-    updatedAt: Instant,
-  )
+    override val createdAt: Instant,
+    override val updatedAt: Instant,
+    override val isDeleted: Boolean = false,
+  ) extends Model(isDeleted, createdAt, updatedAt)
