@@ -1,34 +1,38 @@
 package ru.otus
 package service
 
-import repository.{ AppointmentDateRepository, BookingRepository, Repository }
+import repository.{AppointmentDateRepository, BookingRepository}
 import dao.AppointmentDate
-import error.{ AppointmentIsPastFailure, DBFailure, DateIsBookedAndConfirmedFailure, ExpectedFailure, InvalidDateRangeFailure, InvalidDeadlineFailure, PeriodIsAlreadyTakenFailure }
-import service.AppointmentDateService.AppointmentDateCreate
+import error.{AppointmentIsPastFailure, DateIsBookedAndConfirmedFailure, ExpectedFailure, InvalidDateRangeFailure, InvalidDeadlineFailure, PeriodIsAlreadyTakenFailure}
+import dto.AppointmentDateAdd
 
-import zio.{ ULayer, ZIO, ZLayer }
+import `type`.AppointmentDateStatus
+import service.AppointmentDateService.AppointmentDateCreate
+import zio.macros.accessible
+import zio.{ULayer, ZIO, ZLayer}
 
 import java.time.Instant
 import java.util.UUID
 
+@accessible
 object DateManageService {
   private type DateManageService    = Service
   private type DateManageServiceEnv =
-    Repository.Env with BookingRepository.Service with BookingService.Service with AppointmentDateRepository.Service with AppointmentDateService.Service
+    db.DataSource with BookingRepository.Service with BookingService.Service with AppointmentDateRepository.Service with AppointmentDateService.Service
 
   trait Service {
-    def addAppointment(date: AppointmentDateCreate): ZIO[DateManageServiceEnv, ExpectedFailure, AppointmentDate]
+    def addAppointment(date: AppointmentDateAdd): ZIO[DateManageServiceEnv, ExpectedFailure, AppointmentDate]
     def removeDate(id: UUID): ZIO[DateManageServiceEnv, ExpectedFailure, Unit]
   }
 
   class ServiceImpl extends Service {
-    override def addAppointment(date: AppointmentDateCreate): ZIO[DateManageServiceEnv, ExpectedFailure, AppointmentDate] =
+    override def addAppointment(date: AppointmentDateAdd): ZIO[DateManageServiceEnv, ExpectedFailure, AppointmentDate] =
       for {
         now     <- ZIO.succeed(Instant.now())
         check   <- AppointmentDateService.checkPeriodExists(date.dateFrom, date.dateTo)
         _       <- ZIO
                      .fail(PeriodIsAlreadyTakenFailure("Period is already taken"))
-                     .when(!check)
+                     .when(check)
         _       <- ZIO
                      .fail(InvalidDateRangeFailure("DateFrom must be before dateTo"))
                      .when(!date.dateFrom.isBefore(date.dateTo))
@@ -38,7 +42,7 @@ object DateManageService {
         _       <- ZIO
                      .fail(AppointmentIsPastFailure("Current time must not be after bookingDeadline"))
                      .when(now.isAfter(date.bookingDeadline))
-        created <- AppointmentDateService.createAppointmentDate(date)
+        created <- AppointmentDateService.createAppointmentDate(AppointmentDateCreate(AppointmentDateStatus.Available, date.dateFrom, date.dateTo, date.bookingDeadline))
       } yield created
 
     override def removeDate(id: UUID): ZIO[DateManageServiceEnv, ExpectedFailure, Unit] =

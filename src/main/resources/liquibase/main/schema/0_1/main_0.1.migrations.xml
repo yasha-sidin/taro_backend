@@ -27,9 +27,6 @@
             <column name="updated_at" type="TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
-            <column name="is_deleted" type="BOOLEAN">
-                <constraints nullable="false"/>
-            </column>
         </createTable>
     </changeSet>
 
@@ -59,9 +56,6 @@
             <column name="updated_at" type="TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
-            <column name="is_deleted" type="BOOLEAN">
-                <constraints nullable="false"/>
-            </column>
         </createTable>
     </changeSet>
 
@@ -82,13 +76,13 @@
             <column name="time_to_confirm" type="TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
+            <column name="can_return" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
             <column name="created_at" type="TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
             <column name="updated_at" type="TIMESTAMP">
-                <constraints nullable="false"/>
-            </column>
-            <column name="is_deleted" type="BOOLEAN">
                 <constraints nullable="false"/>
             </column>
         </createTable>
@@ -127,9 +121,6 @@
             <column name="updated_at" type="TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
-            <column name="is_deleted" type="BOOLEAN">
-                <constraints nullable="false"/>
-            </column>
         </createTable>
     </changeSet>
 
@@ -154,9 +145,6 @@
                 <constraints nullable="false"/>
             </column>
             <column name="updated_at" type="TIMESTAMP">
-                <constraints nullable="false"/>
-            </column>
-            <column name="is_deleted" type="BOOLEAN">
                 <constraints nullable="false"/>
             </column>
         </createTable>
@@ -189,9 +177,6 @@
                 <constraints nullable="false"/>
             </column>
             <column name="updated_at" type="TIMESTAMP">
-                <constraints nullable="false"/>
-            </column>
-            <column name="is_deleted" type="BOOLEAN">
                 <constraints nullable="false"/>
             </column>
         </createTable>

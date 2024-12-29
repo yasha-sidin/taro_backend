@@ -3,6 +3,10 @@ package dao
 
 import `type`.AppConstant
 
+import zio.json.{SnakeCase, jsonDerive, jsonMemberNames}
+
+@jsonDerive
+@jsonMemberNames(SnakeCase)
 case class Constant(key: AppConstant, value: String)
 
 object Constant {

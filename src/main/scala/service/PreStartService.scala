@@ -2,9 +2,9 @@ package ru.otus
 package service
 
 import db.LiquibaseService
-import repository.{ConstantRepository, Repository}
-
+import repository.{AppointmentDateRepository, BookingRepository, ConstantRepository, TelegramUserRepository}
 import error.{ExpectedFailure, MigrationFailure}
+
 import zio.{ULayer, ZIO, ZLayer}
 import zio.macros.accessible
 
@@ -12,7 +12,19 @@ import zio.macros.accessible
 object PreStartService {
   private type PreStartService    = Service
   private type PreStartServiceEnv =
-    Repository.Env with ConstantRepository.Service with ConstantService.Service with LiquibaseService.Service with LiquibaseService.Liqui
+    db.DataSource
+      with ConstantRepository.Service
+      with ConstantService.Service
+      with LiquibaseService.Service
+      with LiquibaseService.Liqui
+      with AppointmentDateRepository.Service
+      with AppointmentDateService.Service
+      with ScheduleService.Service
+      with BookingRepository.Service
+      with BookingService.Service
+      with BookService.Service
+      with TelegramUserRepository.Service
+      with TelegramUserService.Service
 
   trait Service {
     def preStart: ZIO[PreStartServiceEnv, ExpectedFailure, Unit]
@@ -23,6 +35,9 @@ object PreStartService {
       for {
         _ <- LiquibaseService.performMigration.mapError(er => MigrationFailure(er.getMessage))
         _ <- ConstantService.initConstants()
+        _ <- ScheduleService.updateExpiredDates().forkDaemon
+        _ <- ScheduleService.cancelNotConfirmedBookings().forkDaemon
+        _ <- ScheduleService.markBookingsAsCompleted().forkDaemon
       } yield ()
   }
 

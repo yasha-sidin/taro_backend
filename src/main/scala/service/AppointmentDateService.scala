@@ -3,9 +3,10 @@ package service
 
 import `type`.AppointmentDateStatus
 import error.{ ExpectedFailure, NotFoundFailure }
-import repository.{ AppointmentDateRepository, Repository }
-
+import repository.AppointmentDateRepository
 import dao.AppointmentDate
+
+import dto.AppointmentDateQueryParams
 import zio.{ Random, ULayer, ZIO, ZLayer }
 import zio.macros.accessible
 
@@ -17,7 +18,7 @@ object AppointmentDateService {
 
   private type AppointmentDateService = Service
 
-  private type AppointmentDateServiceEnv = Repository.Env with AppointmentDateRepository.Service
+  private type AppointmentDateServiceEnv = db.DataSource with AppointmentDateRepository.Service
 
   case class AppointmentDateCreate(
       status: AppointmentDateStatus,
@@ -33,6 +34,8 @@ object AppointmentDateService {
     def removeAppointmentDate(id: UUID): ZIO[AppointmentDateServiceEnv, ExpectedFailure, Unit]
     def checkPeriodExists(dateFrom: Instant, dateTo: Instant): ZIO[AppointmentDateServiceEnv, ExpectedFailure, Boolean]
     def getAvailableDates: ZIO[AppointmentDateServiceEnv, ExpectedFailure, List[AppointmentDate]]
+    def updateExpiredDates(): ZIO[AppointmentDateServiceEnv, ExpectedFailure, Unit]
+    def getFilteredDates(searchParams: AppointmentDateQueryParams): ZIO[AppointmentDateServiceEnv, ExpectedFailure, List[AppointmentDate]]
   }
 
   class ServiceImpl extends Service {
@@ -51,6 +54,7 @@ object AppointmentDateService {
                     now,
                   )
                 )
+        _ <- ZIO.logInfo(date.toString)
       } yield date
 
     override def updateAppointmentDate(appointmentDate: AppointmentDate): ZIO[AppointmentDateServiceEnv, ExpectedFailure, AppointmentDate] =
@@ -64,17 +68,35 @@ object AppointmentDateService {
       AppointmentDateRepository.getDataById(id).some.orElseFail(NotFoundFailure(s"Date with id $id has not been found."))
 
     override def removeAppointmentDate(id: UUID): ZIO[AppointmentDateServiceEnv, ExpectedFailure, Unit] =
-      AppointmentDateRepository.changeFlagDeletedById(id)
+      AppointmentDateRepository.deletedById(id)
 
     override def checkPeriodExists(dateFrom: Instant, dateTo: Instant): ZIO[AppointmentDateServiceEnv, ExpectedFailure, Boolean] =
       AppointmentDateRepository.checkPeriodExists(dateFrom, dateTo)
 
     override def getAvailableDates: ZIO[AppointmentDateServiceEnv, ExpectedFailure, List[AppointmentDate]] =
       for {
-        dates <- AppointmentDateRepository.getDatesByStatus(AppointmentDateStatus.Available)
-        now <- ZIO.succeed(Instant.now())
+        dates         <- AppointmentDateRepository.getDatesByStatus(AppointmentDateStatus.Available)
+        now           <- ZIO.succeed(Instant.now())
         filteredDates <- ZIO.filterPar(dates)(date => ZIO.succeed(!date.isExpired(now)))
       } yield filteredDates
+
+    override def updateExpiredDates(): ZIO[AppointmentDateServiceEnv, ExpectedFailure, Unit] =
+      for {
+        updatedCount <- AppointmentDateRepository.updateExpiredDates()
+        _            <- ZIO.logInfo(s"Expired dates count: ${updatedCount}")
+      } yield ()
+
+    override def getFilteredDates(searchParams: AppointmentDateQueryParams): ZIO[AppointmentDateServiceEnv, ExpectedFailure, List[AppointmentDate]] =
+      for {
+        res <- searchParams.status match {
+                 case Some(status) =>
+                   status match {
+                     case AppointmentDateStatus.Available => this.getAvailableDates
+                     case status                          => AppointmentDateRepository.getDatesByStatus(status)
+                   }
+                 case None         => AppointmentDateRepository.getAllData
+               }
+      } yield res
   }
 
   val live: ULayer[AppointmentDateService] = ZLayer.succeed(new ServiceImpl)

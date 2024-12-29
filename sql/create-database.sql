@@ -1,1 +1,0 @@
-create DATABASE taro_backend_db;

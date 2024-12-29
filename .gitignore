@@ -45,5 +45,6 @@ build/
 
 ### Scala ###
 .bsp/
-
+./data
 .env
+/data/

@@ -8,6 +8,7 @@ import java.util.UUID
 
 case class Booking(
     id: UUID,
+    bookNumber: Long,
     userId: UUID,
     dateId: UUID,
     status: BookingStatus,
@@ -15,8 +16,7 @@ case class Booking(
     timeToConfirm: Instant,
     override val createdAt: Instant,
     override val updatedAt: Instant,
-    override val isDeleted: Boolean = false,
-  ) extends Model(isDeleted, createdAt, updatedAt) { self =>
+  ) extends Model(createdAt, updatedAt) { self =>
   def isActive: Boolean    = self.status == BookingStatus.Active
   def isCancelled: Boolean = self.status == BookingStatus.Cancelled
   def isCompleted: Boolean = self.status == BookingStatus.Completed

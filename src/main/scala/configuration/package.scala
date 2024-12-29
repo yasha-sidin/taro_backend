@@ -1,6 +1,6 @@
 package ru.otus
 
-import ru.otus.error.ConfigFailure
+import error.ConfigFailure
 import zio.{Config, ConfigProvider, ZIO, ZLayer}
 import zio.config.magnolia._
 
@@ -35,6 +35,7 @@ package object configuration {
   case class ServerConfig(
       host: String,
       port: Int,
+      prefixPath: String,
     )
 
   private val configDescriptor: Config[AppConfig] = deriveConfig[AppConfig]

@@ -2,11 +2,11 @@ package ru.otus
 package service
 
 import `type`.BookingStatus
-import dao.Booking
-import error.{ ExpectedFailure, NotFoundFailure }
-import repository.{ BookingRepository, Repository }
+import dao.{AppointmentDate, Booking}
+import error.{ExpectedFailure, NotFoundFailure}
+import repository.BookingRepository
 
-import zio.{ Random, ULayer, ZIO, ZLayer }
+import zio.{Random, ULayer, ZIO, ZLayer}
 import zio.macros.accessible
 
 import java.time.Instant
@@ -17,7 +17,7 @@ object BookingService {
 
   private type BookingService = Service
 
-  private type BookingServiceEnv = Repository.Env with BookingRepository.Service
+  private type BookingServiceEnv = db.DataSource with BookingRepository.Service
 
   case class BookingCreate(
       status: BookingStatus,
@@ -32,6 +32,9 @@ object BookingService {
     def updateBooking(booking: Booking): ZIO[BookingServiceEnv, ExpectedFailure, Booking]
     def getBookingById(id: UUID): ZIO[BookingServiceEnv, ExpectedFailure, Booking]
     def getDateBookings(dateId: UUID): ZIO[BookingServiceEnv, ExpectedFailure, List[Booking]]
+    def getBookingsByStatus(status: BookingStatus): ZIO[BookingServiceEnv, ExpectedFailure, List[Booking]]
+    def getBookingsWithDateByStatus(status: BookingStatus): ZIO[BookingServiceEnv, ExpectedFailure, List[(Booking, AppointmentDate)]]
+    def getFilteredBookingsWithDate(status: Option[BookingStatus], chatId: Option[Long]): ZIO[BookingServiceEnv, ExpectedFailure, List[(Booking, AppointmentDate)]]
   }
 
   class ServiceImpl extends Service {
@@ -40,9 +43,11 @@ object BookingService {
       for {
         uuid      <- Random.nextUUID
         createdAt <- ZIO.succeed(Instant.now())
+        long <- ZIO.succeed(UUID.randomUUID().getLeastSignificantBits)
         booking   <- BookingRepository.insertData(
                        Booking(
                          uuid,
+                         long,
                          bookingCreate.userId,
                          bookingCreate.dateId,
                          bookingCreate.status,
@@ -66,6 +71,15 @@ object BookingService {
 
     override def getDateBookings(dateId: UUID): ZIO[BookingServiceEnv, ExpectedFailure, List[Booking]] =
       BookingRepository.getDateBookings(dateId)
+
+    override def getBookingsByStatus(status: BookingStatus): ZIO[BookingServiceEnv, ExpectedFailure, List[Booking]] =
+      BookingRepository.getBookingsByStatus(status)
+
+    override def getBookingsWithDateByStatus(status: BookingStatus): ZIO[BookingServiceEnv, ExpectedFailure, List[(Booking, AppointmentDate)]] =
+      BookingRepository.getBookingsWithDateByStatus(status)
+
+    override def getFilteredBookingsWithDate(status: Option[BookingStatus], chatId: Option[Long]): ZIO[BookingServiceEnv, ExpectedFailure, List[(Booking, AppointmentDate)]] =
+      BookingRepository.getFilteredBookingWithDate(status, chatId)
   }
 
   val live: ULayer[BookingService] = ZLayer.succeed(new ServiceImpl)

@@ -1,8 +1,9 @@
 package ru.otus
 package `type`
 
-import enumeratum.{ EnumEntry, _ }
+import enumeratum.{EnumEntry, _}
 import io.getquill.MappedEncoding
+import zio.json.{JsonDecoder, JsonEncoder}
 
 sealed trait BookingStatus extends EnumEntry
 
@@ -19,4 +20,9 @@ object BookingStatus extends Enum[BookingStatus] {
 
   implicit val decodeBookingStatus: MappedEncoding[String, BookingStatus] =
     MappedEncoding[String, BookingStatus](BookingStatus.withName)
+
+  implicit val encoder: JsonEncoder[BookingStatus] = JsonEncoder[String].contramap(_.entryName)
+  implicit val decoder: JsonDecoder[BookingStatus] = JsonDecoder[String].mapOrFail { str =>
+    BookingStatus.withNameOption(str).toRight(s"Invalid AppointmentDateStatus: $str")
+  }
 }

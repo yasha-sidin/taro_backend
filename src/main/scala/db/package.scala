@@ -1,17 +1,19 @@
 package ru.otus
 
 import com.zaxxer.hikari.HikariDataSource
-import io.getquill.{Literal, NamingStrategy, PostgresZioJdbcContext, SnakeCase}
-import configuration.{Configuration, LiquibaseConfig, PostgresConfig}
+import io.getquill.{ Literal, NamingStrategy, PostgresZioJdbcContext, Query, Quoted, SnakeCase }
+import configuration.{ Configuration, LiquibaseConfig, PostgresConfig }
 
 import liquibase.Liquibase
 import liquibase.database.jvm.JdbcConnection
-import liquibase.resource.{ClassLoaderResourceAccessor, CompositeResourceAccessor, SearchPathResourceAccessor}
-import ru.otus.error.{DBFailure, ExpectedFailure, MigrationFailure}
-import zio.macros.accessible
-import zio.{RIO, RLayer, Scope, ULayer, URIO, URLayer, ZIO, ZLayer}
+import liquibase.resource.{ ClassLoaderResourceAccessor, CompositeResourceAccessor, SearchPathResourceAccessor }
+import error.{ DBFailure, ExpectedFailure, MigrationFailure }
 
-import javax.sql.{DataSource => Source}
+import zio.macros.accessible
+import zio.{ RIO, Scope, ULayer, ZIO, ZLayer }
+
+import java.sql.SQLException
+import javax.sql.{ DataSource => Source }
 
 package object db {
   type DataSource = Source
@@ -29,7 +31,7 @@ package object db {
   val zioDS: ZLayer[Configuration, ExpectedFailure, DataSource] = ZLayer {
     for {
       config <- ZIO.service[Configuration]
-      ds <- ZIO.attempt(hikariDS(config.postgres)).mapError(er => DBFailure(er))
+      ds     <- ZIO.attempt(hikariDS(config.postgres)).mapError(er => DBFailure(er, er.getMessage))
     } yield ds
   }
 

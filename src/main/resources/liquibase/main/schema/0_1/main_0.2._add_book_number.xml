@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="add-book-number" author="Yakov Sidin">
+        <createSequence
+                sequenceName="booking_number_seq"
+                startValue="1"
+                incrementBy="1" />
+
+        <addColumn tableName="booking">
+            <column name="book_number" type="BIGINT">
+                <constraints nullable="false" />
+            </column>
+        </addColumn>
+
+        <addDefaultValue tableName="booking"
+                         columnName="book_number"
+                         defaultValueSequenceNext="booking_number_seq" />
+
+        <sql>
+            ALTER SEQUENCE booking_number_seq OWNED BY booking.book_number;
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>
