@@ -39,8 +39,6 @@ object AppointmentDateRepository {
         quote {
           schema.filter(row => row.status == lift(status))
         }
-      }.tap { res =>
-        ZIO.logInfo(s"Running query: ${res.toString}")
       }.mapError(er => DBFailure(er, er.getMessage))
 
     override def checkPeriodExists(dateFrom: Instant, dateTo: Instant): DIO[Boolean] =

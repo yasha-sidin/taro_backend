@@ -9,22 +9,22 @@
             <column name="id" type="UUID">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="date_from" type="TIMESTAMP">
+            <column name="date_from" type="TIMESTAMPTZ">
                 <constraints unique="true" nullable="false"/>
             </column>
-            <column name="date_to" type="TIMESTAMP">
+            <column name="date_to" type="TIMESTAMPTZ">
                 <constraints unique="true" nullable="false"/>
             </column>
             <column name="status" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="booking_deadline" type="TIMESTAMP">
+            <column name="booking_deadline" type="TIMESTAMPTZ">
                 <constraints nullable="false"/>
             </column>
-            <column name="created_at" type="TIMESTAMP">
+            <column name="created_at" type="TIMESTAMPTZ">
                 <constraints nullable="false"/>
             </column>
-            <column name="updated_at" type="TIMESTAMP">
+            <column name="updated_at" type="TIMESTAMPTZ">
                 <constraints nullable="false"/>
             </column>
         </createTable>
@@ -50,10 +50,10 @@
             <column name="language_code" type="VARCHAR(10)">
                 <constraints nullable="true"/>
             </column>
-            <column name="created_at" type="TIMESTAMP">
+            <column name="created_at" type="TIMESTAMPTZ">
                 <constraints nullable="false"/>
             </column>
-            <column name="updated_at" type="TIMESTAMP">
+            <column name="updated_at" type="TIMESTAMPTZ">
                 <constraints nullable="false"/>
             </column>
         </createTable>
@@ -73,16 +73,19 @@
             <column name="status" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="time_to_confirm" type="TIMESTAMP">
+            <column name="time_to_confirm" type="TIMESTAMPTZ">
                 <constraints nullable="false"/>
             </column>
             <column name="can_return" type="BOOLEAN">
                 <constraints nullable="false"/>
             </column>
-            <column name="created_at" type="TIMESTAMP">
+            <column name="book_number" type="BIGINT">
+                <constraints nullable="false" />
+            </column>
+            <column name="created_at" type="TIMESTAMPTZ">
                 <constraints nullable="false"/>
             </column>
-            <column name="updated_at" type="TIMESTAMP">
+            <column name="updated_at" type="TIMESTAMPTZ">
                 <constraints nullable="false"/>
             </column>
         </createTable>
@@ -98,10 +101,6 @@
                                  constraintName="fk_booking_user_id_telegram_user_id"
                                  referencedColumnNames="id"
                                  referencedTableName="telegram_user"/>
-
-        <addUniqueConstraint tableName="booking"
-                             columnNames="user_id,date_id"
-                             constraintName="uq_booking_user_date"/>
     </changeSet>
 
     <changeSet id="create-user-admin-table" author="Yakov Sidin">
@@ -115,10 +114,10 @@
             <column name="password" type="TEXT">
                 <constraints nullable="false"/>
             </column>
-            <column name="created_at" type="TIMESTAMP">
+            <column name="created_at" type="TIMESTAMPTZ">
                 <constraints nullable="false"/>
             </column>
-            <column name="updated_at" type="TIMESTAMP">
+            <column name="updated_at" type="TIMESTAMPTZ">
                 <constraints nullable="false"/>
             </column>
         </createTable>
@@ -132,7 +131,7 @@
             <column name="body" type="TEXT">
                 <constraints nullable="false"/>
             </column>
-            <column name="send_after" type="TIMESTAMP">
+            <column name="send_after" type="TIMESTAMPTZ">
                 <constraints nullable="false"/>
             </column>
             <column name="telegram_user_id" type="UUID">
@@ -141,10 +140,10 @@
             <column name="sent" type="BOOLEAN">
                 <constraints nullable="false"/>
             </column>
-            <column name="created_at" type="TIMESTAMP">
+            <column name="created_at" type="TIMESTAMPTZ">
                 <constraints nullable="false"/>
             </column>
-            <column name="updated_at" type="TIMESTAMP">
+            <column name="updated_at" type="TIMESTAMPTZ">
                 <constraints nullable="false"/>
             </column>
         </createTable>
@@ -167,16 +166,16 @@
             <column name="token" type="TEXT">
                 <constraints nullable="false"/>
             </column>
-            <column name="expires_at" type="TIMESTAMP">
+            <column name="expires_at" type="TIMESTAMPTZ">
                 <constraints nullable="false"/>
             </column>
-            <column name="last_used_at" type="TIMESTAMP">
+            <column name="last_used_at" type="TIMESTAMPTZ">
                 <constraints nullable="false"/>
             </column>
-            <column name="created_at" type="TIMESTAMP">
+            <column name="created_at" type="TIMESTAMPTZ">
                 <constraints nullable="false"/>
             </column>
-            <column name="updated_at" type="TIMESTAMP">
+            <column name="updated_at" type="TIMESTAMPTZ">
                 <constraints nullable="false"/>
             </column>
         </createTable>
